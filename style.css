@@ -17,7 +17,7 @@ html {
     gap: 1rem;
 }
 
-#key-button {
+.key-button {
     text-align: center;
     font-size: 2rem;
     padding: .5rem;

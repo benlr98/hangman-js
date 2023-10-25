@@ -3,36 +3,44 @@
 let elKeyboardDiv = document.getElementById("keyboard");
 let elHiddenWordDiv = document.getElementById("hidden-word");
 let elStrikesSpan = document.getElementById("strikes");
+let elResetBtn = document.getElementById("reset-button")
+elResetBtn.onclick = handleResetGame
 
-let secretWord = "polar bear";
+let secretWord = "bear";
 // include space so it doesn't have to be guessed 
 let guessedLetters = [" "];
 let strikes = 0;
 
+function handleUpdateStrikes() {
+    elStrikesSpan.innerText = strikes;
+    return true
+}
 
-function updateHiddenWord() {
+function handleUpdateHiddenWord() {
     let secretWordArray = secretWord.split("")
+    // clear the hidden word before updating 
     elHiddenWordDiv.innerHTML = "";
 
     secretWordArray.forEach(letter => {
         letterDivEl = document.createElement("div");
-        letterDivEl.className = "guess-letter";
-        isGuessedLetter(letter, guessedLetters);
-        letterDivEl.innerText = isGuessedLetter(letter, guessedLetters) ? letter: "";
+        letterDivEl.classList.add("hidden-letter");
+        let isGuessed = guessedLetters.includes(letter)
+        if (isGuessed) {
+            letterDivEl.innerText = letter;
+            letterDivEl.classList.add("revealed-letter");
+        }
+        // handle spaces not having bottom border 
+        if (letter == " ") {
+            letterDivEl.classList.add("space-char");
+        }
         elHiddenWordDiv.appendChild(letterDivEl);
     })
 }
 
-function updateStrikes() {
-    elStrikesSpan.innerText = strikes;
-}
 
-function isGuessedLetter(letter, guessedLetterArray) {
-    let isGuessed = guessedLetterArray.includes(letter)
-    return isGuessed
-}
-
-function createKeyboard() {
+function handleCreateKeyboard() {
+    // reset keyboard
+    elKeyboardDiv.innerHTML = "";
     // create keyboard array of letters 
     let lettersString = "abcdefghijklmnopqrstuvwxyz"
     let lettersArray = lettersString.split("")
@@ -48,6 +56,27 @@ function createKeyboard() {
     
 }
 
+function checkGameStatus() {
+    let gameStatus = "playing";
+    let allLettersGuessed = true;
+
+    for (let letter in secretWord) {
+        if (!guessedLetters.includes(secretWord[letter])) {
+            allLettersGuessed = false
+        }
+    }
+
+    if (allLettersGuessed === true) {
+        gameStatus = "win"
+    }
+    if (strikes >= 5) {
+        gameStatus = "lose"
+    }
+
+
+    return gameStatus
+}
+
 
 function handleGuess(e) {
     let isCorrect = secretWord.includes(e.target.innerText)
@@ -55,14 +84,29 @@ function handleGuess(e) {
     if (!isCorrect) {
         strikes++
     }
-    updateHiddenWord()
-    updateStrikes()
+    handleUpdateHiddenWord()
+    handleUpdateStrikes()
+    e.target.classList.add("key-button-guessed")
     e.target.removeEventListener("click", handleGuess)
 
-    return isCorrect
+    if (checkGameStatus() == "lose") {
+        alert("You lose!")
+    } else if (checkGameStatus() == "win") {
+        alert("You win!")
+    }
+    
+}
+
+function handleResetGame() {
+    guessedLetters = [" "];
+    strikes = 0;
+
+    handleCreateKeyboard();
+    handleUpdateHiddenWord();
+    handleUpdateStrikes();
     
 }
 
 // create display and start game 
-updateHiddenWord()
-createKeyboard()
+handleUpdateHiddenWord()
+handleCreateKeyboard()

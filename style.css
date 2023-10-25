@@ -16,13 +16,21 @@ html {
     gap: .5rem;
 }
 
-.guess-letter {
+.hidden-letter {
     text-align: center;
     font-size: 2rem;
     padding: .5rem;
     width: 3rem;
     height: 3rem;
     border-bottom: 3px solid black;
+}
+
+.revealed-letter {
+    
+}
+
+.space-char {
+    border-bottom: none;
 }
 
 #keyboard {
@@ -40,6 +48,10 @@ html {
     width: 3rem;
     height: 3rem;
     border: .2rem solid black;
+}
+
+.key-button-guessed {
+    background-color: gray;
 }
 
 .key-button:hover {

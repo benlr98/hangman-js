@@ -4,12 +4,19 @@ let elKeyboardDiv = document.getElementById("keyboard");
 let elHiddenWordDiv = document.getElementById("hidden-word");
 let elStrikesSpan = document.getElementById("strikes");
 let elResetBtn = document.getElementById("reset-button")
-elResetBtn.onclick = handleResetGame
+elResetBtn.addEventListener("click", handleResetGame)
 
-let secretWord = "bear";
+let secretWord = "default";
 // include space so it doesn't have to be guessed 
 let guessedLetters = [" "];
 let strikes = 0;
+
+async function handleResetSecretWord() {
+    let response = await fetch("https://random-word-api.vercel.app/api?words=1")
+    let newWord = await response.json()
+
+    secretWord = await newWord[0]
+}
 
 function handleUpdateStrikes() {
     elStrikesSpan.innerText = strikes;
@@ -91,22 +98,25 @@ function handleGuess(e) {
 
     if (checkGameStatus() == "lose") {
         alert("You lose!")
+        guessedLetters = secretWord.split("");
+        handleUpdateHiddenWord();
+
     } else if (checkGameStatus() == "win") {
         alert("You win!")
     }
     
 }
 
-function handleResetGame() {
+async function handleResetGame() {
     guessedLetters = [" "];
     strikes = 0;
 
+
+    await handleResetSecretWord();
     handleCreateKeyboard();
     handleUpdateHiddenWord();
     handleUpdateStrikes();
     
 }
 
-// create display and start game 
-handleUpdateHiddenWord()
-handleCreateKeyboard()
+handleResetGame()

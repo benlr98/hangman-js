@@ -1,122 +1,163 @@
+"use strict"
 
-// keyboard to push new letter buttons to 
-let elKeyboardDiv = document.getElementById("keyboard");
-let elHiddenWordDiv = document.getElementById("hidden-word");
-let elStrikesSpan = document.getElementById("strikes");
-let elResetBtn = document.getElementById("reset-button")
-elResetBtn.addEventListener("click", handleResetGame)
+// Hangman Class
+class Hangman {
+  constructor(maxTries) {
+    this.word = "";
+    this.maxTries = maxTries;
+    this.guesses = [];
+    this.remainingTries = maxTries;
+  }
 
-let secretWord = "default";
-// include space so it doesn't have to be guessed 
-let guessedLetters = [" "];
-let strikes = 0;
-
-async function handleResetSecretWord() {
-    let response = await fetch("https://random-word-api.vercel.app/api?words=1")
-    let newWord = await response.json()
-
-    secretWord = await newWord[0]
-}
-
-function handleUpdateStrikes() {
-    elStrikesSpan.innerText = strikes;
-    return true
-}
-
-function handleUpdateHiddenWord() {
-    let secretWordArray = secretWord.split("")
-    // clear the hidden word before updating 
-    elHiddenWordDiv.innerHTML = "";
-
-    secretWordArray.forEach(letter => {
-        letterDivEl = document.createElement("div");
-        letterDivEl.classList.add("hidden-letter");
-        let isGuessed = guessedLetters.includes(letter)
-        if (isGuessed) {
-            letterDivEl.innerText = letter;
-            letterDivEl.classList.add("revealed-letter");
+  async getRandomWord() {
+    try {
+        const response = await fetch("https://random-word-api.vercel.app/api?words=1");
+        if (response.ok) {
+            const data = await response.json();
+            this.word = data[0].toLowerCase();
+            return this.word;
+        } else {
+            throw new Error("Failed to fetch a random word...");
         }
-        // handle spaces not having bottom border 
-        if (letter == " ") {
-            letterDivEl.classList.add("space-char");
-        }
-        elHiddenWordDiv.appendChild(letterDivEl);
-    })
-}
-
-
-function handleCreateKeyboard() {
-    // reset keyboard
-    elKeyboardDiv.innerHTML = "";
-    // create keyboard array of letters 
-    let lettersString = "abcdefghijklmnopqrstuvwxyz"
-    let lettersArray = lettersString.split("")
-    
-    lettersArray.forEach(letter => {
-        let letterButtonEl = document.createElement("div")
-        letterButtonEl.className = "key-button"
-        letterButtonEl.innerText = letter
-        elKeyboardDiv.appendChild(letterButtonEl)
-        letterButtonEl.addEventListener("click", handleGuess)
         
+    } catch (error) {
+        console.error(error)
+    }
+  }
+
+  makeGuess(letter) {
+    letter = letter.toLowerCase();
+    if (!this.isGameOver() && !this.guesses.includes(letter)) {
+      this.guesses.push(letter);
+      if (!this.word.includes(letter)) {
+        this.remainingTries--;
+      }
+    }
+  }
+
+  displayWord() {
+    let display = "";
+    for (const char of this.word) {
+      if (this.guesses.includes(char)) {
+        display += char;
+      } else {
+        display += "_";
+      }
+    }
+    return display;
+  }
+
+  revealWord() {
+    this.guesses = this.word.split("");
+  }
+
+  isGameOver() {
+    return this.isWordGuessed() || this.remainingTries <= 0;
+  }
+
+  isWordGuessed() {
+    return this.word.split("").every((char) => this.guesses.includes(char));
+  }
+
+  async resetGame() {
+    this.guesses = [];
+    this.remainingTries = this.maxTries;
+    this.word = '';
+    await this.getRandomWord(); // Fetch a new random word
+  }
+}
+
+// KeyboardButton Class
+class KeyboardButton {
+  constructor(letter, onButtonClick) {
+    this.letter = letter;
+    this.onButtonClick = onButtonClick;
+    this.clicked = false;
+
+    this.buttonElement = document.createElement("button");
+    this.buttonElement.textContent = letter;
+    this.buttonElement.classList.add("key-button");
+
+    this.buttonElement.addEventListener("click", () => {
+      this.clicked = true;
+      this.buttonElement.classList.add("guessed");
+      this.onButtonClick(letter);
+      this.buttonElement.disabled = true;
     });
-    
+  }
+
+  render(parentElement) {
+    parentElement.appendChild(this.buttonElement);
+  }
 }
 
-function checkGameStatus() {
-    let gameStatus = "playing";
-    let allLettersGuessed = true;
+// Keyboard Class
+class Keyboard {
+  constructor(onButtonClick) {
+    this.buttons = "abcdefghijklmnopqrstuvwxyz".split("").map((letter) => {
+      return new KeyboardButton(letter, onButtonClick);
+    });
+  }
 
-    for (let letter in secretWord) {
-        if (!guessedLetters.includes(secretWord[letter])) {
-            allLettersGuessed = false
-        }
-    }
-
-    if (allLettersGuessed === true) {
-        gameStatus = "win"
-    }
-    if (strikes >= 5) {
-        gameStatus = "lose"
-    }
-
-
-    return gameStatus
+  render(parentElement) {
+    const keyboardElement = document.createElement("div");
+    keyboardElement.classList.add("keyboard");
+    this.buttons.forEach((button) => button.render(keyboardElement));
+    parentElement.appendChild(keyboardElement);
+  }
 }
 
 
-function handleGuess(e) {
-    let isCorrect = secretWord.includes(e.target.innerText)
-    guessedLetters.push(e.target.innerText)
-    if (!isCorrect) {
-        strikes++
-    }
-    handleUpdateHiddenWord()
-    handleUpdateStrikes()
-    e.target.classList.add("key-button-guessed")
-    e.target.removeEventListener("click", handleGuess)
-
-    if (checkGameStatus() == "lose") {
-        alert("You lose!")
-        guessedLetters = secretWord.split("");
-        handleUpdateHiddenWord();
-
-    } else if (checkGameStatus() == "win") {
-        alert("You win!")
-    }
-    
+function handleGuess(letter) {
+  hangman.makeGuess(letter);
+  updateGameDisplay();
 }
 
-async function handleResetGame() {
-    guessedLetters = [" "];
-    strikes = 0;
-
-
-    await handleResetSecretWord();
-    handleCreateKeyboard();
-    handleUpdateHiddenWord();
-    handleUpdateStrikes();
-    
+async function handleReset() {
+    await hangman.resetGame();
+    document.getElementById("keyboard-container").innerHTML = "";
+    keyboard = new Keyboard(handleGuess);
+    keyboard.render(document.getElementById("keyboard-container"));
+    updateGameDisplay();
 }
 
-handleResetGame()
+function handleGiveUp() {
+    hangman.revealWord();
+    updateGameDisplay();
+    console.log("run")
+}
+
+function updateGameDisplay() {
+  const wordDisplay = hangman.displayWord();
+  const gameState = hangman.isGameOver()
+    ? hangman.isWordGuessed()
+      ? "You won!"
+      : "You lost!"
+    : `Tries left: ${hangman.remainingTries}`;
+  document.getElementById("word-display").textContent = wordDisplay;
+  document.getElementById("game-state").textContent = gameState;
+
+}
+
+
+async function startGame() {
+    await hangman.getRandomWord();
+    updateGameDisplay();
+}
+
+
+
+const maxTries = 6;
+const hangman = new Hangman(maxTries);
+
+// Create the reset button and add a click event listener
+const resetButton = document.getElementById('reset-button');
+resetButton.addEventListener('click', handleReset);
+
+const giveUpButton = document.getElementById('give-up-button');
+giveUpButton.addEventListener('click', handleGiveUp);
+
+let keyboard = new Keyboard(handleGuess);
+keyboard.render(document.getElementById("keyboard-container"));
+
+startGame();

@@ -10,30 +10,17 @@ html {
     max-width: 600px;
 }
 
-#hidden-word {
-    display: flex;
-    justify-content: center;
-    gap: .5rem;
+#word-display {
+    font-size: 4rem;
+    letter-spacing: 1rem;
+    margin-bottom: 2rem;
 }
 
-.hidden-letter {
-    text-align: center;
+#game-state {
     font-size: 2rem;
-    padding: .5rem;
-    width: 3rem;
-    height: 3rem;
-    border-bottom: 3px solid black;
 }
 
-.revealed-letter {
-    
-}
-
-.space-char {
-    border-bottom: none;
-}
-
-#keyboard {
+.keyboard {
     margin-top: 2rem;
     display: flex;
     flex-flow: row wrap;
@@ -42,18 +29,18 @@ html {
 }
 
 .key-button {
+    background: none;
     text-align: center;
     font-size: 2rem;
-    padding: .5rem;
-    width: 3rem;
-    height: 3rem;
+    width: 4rem;
+    height: 4rem;
     border: .2rem solid black;
-}
-
-.key-button-guessed {
-    background-color: gray;
 }
 
 .key-button:hover {
     cursor: pointer;
+}
+
+.guessed {
+    background-color: gray;
 }

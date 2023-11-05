@@ -41,6 +41,10 @@ html {
     cursor: pointer;
 }
 
-.guessed {
+.incorrect {
     background-color: gray;
+}
+
+.correct {
+    background-color: green;
 }

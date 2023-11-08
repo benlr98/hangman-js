@@ -106,9 +106,6 @@ class Keyboard {
     this.buttons = "abcdefghijklmnopqrstuvwxyz".split("").map((letter) => {
       return new KeyboardButton(letter, onButtonClick, word);
     });
-
-    // TODO: REMOVE
-    console.log(word);
   }
 
   render(parentElement) {
@@ -167,7 +164,6 @@ async function startGame() {
   keyboard = new Keyboard(handleGuess, hangman.word);
   keyboard.render(document.getElementById("keyboard-container"));
   updateGameDisplay();
-	console.log(hangman.gamesWon);
 }
 
 const maxTries = 6;

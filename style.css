@@ -1,8 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;900&display=swap');
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 html {
     font-size: 16px;
+    font-family: 'Roboto', sans-serif;
 }
+
 
 .container {
     margin: 0 auto;
@@ -20,8 +28,33 @@ html {
     font-size: 2rem;
 }
 
-.keyboard {
+#game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem 0 3rem 0;
+    overflow: hidden;
+}
+
+#game-controls > button {
+    background-color: black;
+    color: whitesmoke;
+    border-radius: 10px;
+    padding: .5rem;
+    cursor: pointer;
+    box-shadow: 2px 2px 10px rgb(97, 97, 97);
+}
+
+#game-controls > button:disabled {
+    background-color: rgb(182, 182, 182);
+    box-shadow: none;
+}
+
+#keyboard-container {
     margin-top: 2rem;
+}
+
+.keyboard {
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
@@ -35,10 +68,13 @@ html {
     width: 4rem;
     height: 4rem;
     border: .2rem solid black;
+    box-shadow: 3px 3px 10px black;
 }
 
-.key-button:hover {
+/* Is not guessed already */
+:not(.correct, .incorrect).key-button:hover {
     cursor: pointer;
+    background-color: rgb(202, 202, 202);
 }
 
 .incorrect {
